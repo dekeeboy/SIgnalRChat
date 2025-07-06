@@ -25,6 +25,6 @@ app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<ChatHub>("/dashboardHub");
 
 app.Run();

@@ -1,0 +1,68 @@
+﻿@page
+@model SIgnalRChat.Pages.DashboardModel
+@{
+    ViewData["Title"] = "Real-Time Dashboard";
+}
+
+<div class="container">
+    <h2>Real-Time Dashboard</h2>
+
+    <!-- Canvas element where Chart.js will render the chart -->
+    <canvas id="stockChart" width="400" height="200"></canvas>
+</div>
+
+<script>
+    var ctx = document.getElementById('stockChart').getContext('2d');
+    var stockChart = new Chart(ctx, {
+        type:'line', // define the char type (line, bar, etc)
+
+        data: {
+            labels: [], // will populate dynamically
+            datasets: [{
+                label: "Stock Price",
+                data: [], // will populate dyanmically
+                boarderColor: 'rgba(75,192, 192, 1)',
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom'
+                }
+            }
+        }
+    })
+</script>
+
+
+<script>
+    // Create a connection to the SingalR hub
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/dashboardHub")
+        .build();
+
+    connection.start().catch(function (err) {
+        return console.error(err.toString());
+    });
+
+    connection.on("ReceiveData", function (message) {
+        const data = message.split(':');
+        const stockSymbol = data[0];
+        const stockPrice = parseFloat(data[1]);
+
+        stockChart.data.labels.push(new Date().ToLocaleTimeString());
+        stockChart.data.datasets[0].data.push(stockPrice);
+
+        if (stockChart.data.labels.length > 20) {
+            stockChart.data.labels.shift();
+            stockChart.data.datasets[0].data.shift();
+        }
+
+        stockchart.update();
+    });
+
+</script>
